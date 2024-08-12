@@ -16,20 +16,27 @@ app.get("/", (req, res) => {
 app.post("/login", (req, res) => {
   console.log(req.body);
   const publickey = req.body.publickey;
-  const token = jwt.sign(
-    { publickey },
-    "secret",
-    { expiresIn: "5m" },
-    (err, token) => {
-      if (err) throw err;
-      res.json({ token });
-    }
-  );
+  console.log("publickey", publickey);
+  if (publickey) {
+    const token = jwt.sign(
+      { publickey: publickey },
+      "secret",
+      { expiresIn: "2m" },
+      (err, token) => {
+        if (err) throw err;
+        res.json({ token });
+        console.log(token);
+      }
+    );
+  } else {
+    res.sendStatus(403);
+  }
 });
 
 app.post("/protected", (req, res) => {
   console.log(req.body);
   const bearer = req.headers.authorization;
+  console.log("bearer", bearer);
   if (bearer) {
     const token = bearer.split(" ")[1];
     jwt.verify(token, "secret", (err, decoded) => {
@@ -37,6 +44,7 @@ app.post("/protected", (req, res) => {
         res.sendStatus(403);
       } else {
         res.json(decoded);
+        console.log("decoded", decoded);
       }
     });
   }
